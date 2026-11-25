@@ -25,6 +25,13 @@ const TOOLS = {
   zd: { name: "ZoneDesk", sub: "Seven income trade types" },
   volume: { name: "Nifty 50 Volume Delta", sub: "Candle-based approximation" },
 };
+const BANNERS = {
+  patterns: { mark: "◎", title: "PATTERN RADAR", sub: "NSE 500 · classical + candlestick patterns · 5m–1W", accent: "#22d3ee", green: "#34d399", red: "#fb7185" },
+  triangle: { mark: "△", title: "TRIANGLE BREAKOUT", sub: "Daily · volume-confirmed breakouts", accent: "#4f9cf0", green: "#2fbf71", red: "#e5675f" },
+  sd: { mark: "SD", title: "SD RADAR", sub: "NSE 500 · supply & demand · daily / weekly / monthly / quarterly", accent: "#59a8ff", green: "#23c98a", red: "#ff5d6c" },
+  zd: { mark: "ZD", title: "ZONEDESK", sub: "Seven income trade types · supply & demand", accent: "#59a8ff", green: "#23c98a", red: "#ff5d6c" },
+  volume: { mark: "Δ", title: "NIFTY 50 VOLUME DELTA", sub: "Buy vs sell volume · candle-based approximation", accent: "#55a3ff", green: "#2dd47f", red: "#ff5d6c" },
+};
 const TF_LABEL = { D: "Daily", W: "Weekly", M: "Monthly", Q: "Quarterly" };
 
 const state = {
@@ -71,6 +78,17 @@ function renderTooltabs() {
   $("#tooltabs").innerHTML = tools.map(t =>
     `<button class="tooltab ${t === state.tool ? "active" : ""}" data-tool="${t}">${TOOLS[t].name}<span class="sub">${TOOLS[t].sub}</span></button>`).join("");
   $$(".tooltab").forEach(b => b.onclick = () => { state.tool = b.dataset.tool; state.sort = {}; renderTooltabs(); renderOpts(); loadState(); });
+  renderBanner();
+}
+function renderBanner() {
+  const b = BANNERS[state.tool] || BANNERS.sd;
+  const el = $("#toolBanner"); if (!el) return;
+  el.innerHTML = `<div class="tb-mark">${b.mark}</div><div class="tb-text"><h2>${esc(b.title)}</h2><p>${esc(b.sub)}</p></div>`;
+  const st = document.documentElement.style;
+  st.setProperty("--accent", b.accent);
+  st.setProperty("--accent2", b.accent);
+  st.setProperty("--green", b.green);
+  st.setProperty("--red", b.red);
 }
 function renderOpts() {
   const el = $("#toolOpts");

@@ -69,6 +69,15 @@ main{padding:16px 20px 40px;max-width:1500px;margin:0 auto}
 .tooltab.active{color:var(--text);border-color:var(--accent);background:var(--panel2)}
 .tooltab .sub{display:block;font-size:10.5px;color:var(--dim);font-weight:400}
 
+.toolbanner{display:flex;align-items:center;gap:14px;padding:12px 16px;margin-bottom:12px;
+  background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:var(--radius)}
+.toolbanner .tb-mark{display:grid;place-items:center;min-width:44px;height:44px;padding:0 10px;border-radius:10px;
+  background:var(--panel2);border:1px solid var(--line2);color:var(--accent);
+  font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.5px}
+.toolbanner .tb-text h2{font-size:16px;letter-spacing:.6px}
+.toolbanner .tb-text p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+
 .controls{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;padding:14px 16px;background:var(--panel);
   border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px}
 .control-group{display:flex;flex-direction:column;gap:5px}
