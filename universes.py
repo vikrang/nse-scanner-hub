@@ -65,6 +65,26 @@ INDICES = {
     "^CNXIT": "NIFTY IT",
 }
 
+# Tradeable indices exposed under the Volume tool (Yahoo tickers verified).
+TRADEABLE_INDICES = [
+    {"symbol": "^NSEI", "name": "NIFTY 50", "industry": "Index"},
+    {"symbol": "^NSEBANK", "name": "BANK NIFTY", "industry": "Index"},
+    {"symbol": "NIFTY_FIN_SERVICE.NS", "name": "FINNIFTY · Financial Services", "industry": "Index"},
+    {"symbol": "^NSEMDCP50", "name": "NIFTY MIDCAP 50", "industry": "Index"},
+    {"symbol": "^BSESN", "name": "SENSEX", "industry": "Index"},
+    {"symbol": "^CNXIT", "name": "NIFTY IT", "industry": "Index"},
+]
+
+
+def with_indices(rows):
+    """Append tradeable indices to a row list, skipping any already present."""
+    have = {r["symbol"] for r in rows}
+    out = list(rows)
+    for r in TRADEABLE_INDICES:
+        if r["symbol"] not in have:
+            out.append(dict(r))
+    return out
+
 
 def resolve_symbol(raw: str) -> str:
     sym = str(raw or "").strip().upper()

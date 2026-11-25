@@ -29,10 +29,10 @@ const TF_LABEL = { D: "Daily", W: "Weekly", M: "Monthly", Q: "Quarterly" };
 
 const state = {
   heading: "sd", tool: "sd", universe: "nifty50", custom: "",
-  volWindow: "session", volInterval: "5m",
+  volWindow: "session", volInterval: "5m", volIndices: false,
   zdTypes: ["DIT", "WIT", "MIT"], zdMin: 4,
   triVol: 1.3, triDays: 2,
-  patternTfs: ["1d", "1h", "15m", "5m", "1w"],
+  patternTfs: ["1d", "1h", "15m", "5m", "1w"], patternFilter: "all",
   sort: {}, polling: null, meta: null, lastResult: null,
 };
 
@@ -78,8 +78,10 @@ function renderOpts() {
     el.innerHTML = `<label>Interval</label><div class="opts-inline">
       ${["1m", "5m"].map(i => `<label class="chk"><input type="radio" name="vi" value="${i}" ${state.volInterval === i ? "checked" : ""}>${i}</label>`).join("")}
       <label style="margin-left:8px">Window</label>
-      <select id="volWindow">${["session", "5m", "15m", "30m", "1h", "2h", "4h"].map(w => `<option value="${w}" ${state.volWindow === w ? "selected" : ""}>${w === "session" ? "Session" : w}</option>`).join("")}</select></div>`;
+      <select id="volWindow">${["session", "5m", "15m", "30m", "1h", "2h", "4h"].map(w => `<option value="${w}" ${state.volWindow === w ? "selected" : ""}>${w === "session" ? "Session" : w}</option>`).join("")}</select>
+      <label class="chk" style="margin-left:8px"><input type="checkbox" id="volIdx" ${state.volIndices ? "checked" : ""}>Indices</label></div>`;
     $$("input[name=vi]", el).forEach(r => r.onchange = () => { state.volInterval = r.value; });
+    $("#volIdx", el).onchange = e => { state.volIndices = e.target.checked; };
     $("#volWindow", el).onchange = e => { state.volWindow = e.target.value; renderResults(); };
   } else if (state.tool === "zd") {
     const trades = state.meta?.trades || {};
@@ -109,7 +111,7 @@ function renderOpts() {
 
 function scanParams(force) {
   const p = { tool: state.tool, universe: state.universe, symbols: state.universe === "custom" ? state.custom : "", force };
-  if (state.tool === "volume") p.interval = state.volInterval;
+  if (state.tool === "volume") { p.interval = state.volInterval; if (state.volIndices) p.include_indices = true; }
   if (state.tool === "zd") p.opts = { types: state.zdTypes, min_score: state.zdMin };
   if (state.tool === "triangle") p.opts = { vol_mult: state.triVol, days_since: state.triDays };
   if (state.tool === "patterns") p.timeframes = state.patternTfs;
@@ -338,8 +340,16 @@ function renderZD(r) {
 function renderPatterns(r) {
   const hits = r.hits || r.patterns || [];
   if (!hits.length) { $("#results").innerHTML = `<div class="empty"><div class="big">📐</div><p>No patterns detected.</p></div>`; return; }
+  const pname = h => h.pattern || h.name || "—";
+  const counts = new Map();
+  hits.forEach(h => { const n = pname(h); counts.set(n, (counts.get(n) || 0) + 1); });
+  const names = [...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a) || a.localeCompare(b));
+  if (state.patternFilter !== "all" && !counts.has(state.patternFilter)) state.patternFilter = "all";
+  const filtered = state.patternFilter === "all" ? hits : hits.filter(h => pname(h) === state.patternFilter);
   const s = getSort("patterns", "confidence");
-  const rows = sortRows(hits, s.key, s.dir);
+  const rows = sortRows(filtered, s.key, s.dir);
+  const tab = (val, label, n) => `<button class="tooltab ${state.patternFilter === val ? "active" : ""}" data-pat="${esc(val)}">${esc(label)}<span class="sub">${n}</span></button>`;
+  const tabs = `<div class="tooltabs" id="patTabs">${tab("all", "All patterns", hits.length)}${names.map(n => tab(n, n, counts.get(n))).join("")}</div>`;
   const head = `<tr>${th("Symbol", "symbol", "patterns", 1)}${th("TF", "tf", "patterns")}${th("Pattern", "pattern", "patterns")}${th("Category", "category", "patterns")}${th("Direction", "direction", "patterns")}${th("Confidence", "confidence", "patterns")}${th("Price", "price", "patterns")}</tr>`;
   const body = rows.map(h => `<tr data-sym="${esc(h.yahooSymbol || h.symbol)}" data-tf="${esc(h.tf || h.timeframe || "")}">
     <td class="l"><span class="sym">${esc((h.symbol || "").replace(".NS", ""))}</span><span class="symname">${esc(h.name || "")}</span></td>
@@ -347,12 +357,14 @@ function renderPatterns(r) {
     <td>${esc(h.pattern || h.name || "")}</td><td>${esc(h.category || "")}</td>
     <td><span class="tag ${h.direction === "bullish" ? "tag-buy" : h.direction === "bearish" ? "tag-sell" : "tag-neutral"}">${h.direction || "—"}</span></td>
     <td><span class="heat" style="${heatColor(h.confidence || 0)}">${h.confidence ?? "—"}</span></td>
-    <td data-live="price">${nf(h.price)}</td></tr>`).join("");
-  $("#results").innerHTML = `<div class="table-wrap"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    <td data-live="price">${nf(h.price)}</td></tr>`).join("") ||
+    `<tr><td colspan="7" class="l muted">No stocks matched this pattern.</td></tr>`;
+  $("#results").innerHTML = `${tabs}<div class="table-wrap"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
   bindSort("patterns", renderResults);
+  $$("#patTabs .tooltab").forEach(b => b.onclick = () => { state.patternFilter = b.dataset.pat; renderResults(); });
   $$("#results tbody tr").forEach(tr => tr.onclick = () => {
     const h = rows.find(x => (x.yahooSymbol || x.symbol) === tr.dataset.sym && (x.tf || x.timeframe) === tr.dataset.tf);
-    openPatternChart(h || rows.find(x => (x.yahooSymbol || x.symbol) === tr.dataset.sym));
+    if (h) openPatternChart(h);
   });
 }
 

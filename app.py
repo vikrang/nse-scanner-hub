@@ -44,7 +44,10 @@ def run_triangle(params, tick):
 
 
 def run_volume(params, tick):
-    return volume.build_scan(_rows(params), tick, interval=params.get("interval", "5m"))
+    rows = _rows(params)
+    if params.get("include_indices"):
+        rows = universes.with_indices(rows)
+    return volume.build_scan(rows, tick, interval=params.get("interval", "5m"))
 
 
 def run_zd(params, tick):
@@ -334,7 +337,7 @@ background:rgba(245,158,11,.12);padding:3px 9px;border-radius:20px;margin-bottom
                     self._json({"error": "unknown tool"}, 400)
                     return
                 mgr = MANAGERS[tool]
-                params = {k: body.get(k) for k in ("universe", "symbols", "interval", "opts", "timeframes")}
+                params = {k: body.get(k) for k in ("universe", "symbols", "interval", "opts", "timeframes", "include_indices")}
                 params["force"] = bool(body.get("force"))
                 started = mgr.start(params)
                 self._json({"ok": True, "started": started, "state": mgr.snapshot()["state"]})
