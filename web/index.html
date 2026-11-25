@@ -6,60 +6,36 @@
 <title>NSE Scanner Hub — Patterns · Supply &amp; Demand · Volume</title>
 <meta name="description" content="Unified NSE stock detection: chart patterns, multi-timeframe supply & demand zones, and volume delta. Yahoo base data with optional Kotak Neo live connect.">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="ui.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b1220'/><path d='M6 22 L13 14 L18 18 L26 8' stroke='%2338bdf8' stroke-width='2.5' fill='none'/></svg>">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <span class="logo">▲</span>
-    <div>
-      <h1>NSE Scanner Hub</h1>
-      <p class="tagline">Patterns · Supply &amp; Demand · Volume</p>
-    </div>
+
+<header class="hubbar">
+  <div class="hub-brand">
+    <span class="hub-mark">▲</span>
+    <b>NSE HUB</b>
   </div>
-  <div id="indexStrip" class="index-strip"></div>
-  <div class="top-actions">
+  <nav class="hub-headings" id="headings" aria-label="Sections">
+    <button class="heading active" data-heading="patterns">Patterns</button>
+    <button class="heading" data-heading="sd">Supply &amp; Demand</button>
+    <button class="heading" data-heading="volume">Volume</button>
+  </nav>
+  <nav class="hub-tools" id="tooltabs" aria-label="Tools"></nav>
+  <div class="hub-right">
     <span id="dataBadge" class="badge badge-yahoo">Yahoo · ~15 min delayed</span>
-    <button id="themeBtn" class="btn btn-ghost" title="Toggle light / dark theme">🌙</button>
+    <button id="themeBtn" class="iconbtn" title="Toggle light / dark theme">🌙</button>
     <span id="userChip" class="user-chip hidden"><span id="userEmail"></span><a href="/auth/logout" title="Sign out">⎋</a></span>
-    <button id="settingsBtn" class="btn btn-ghost" title="Connect Kotak Neo">⚙ Connect</button>
+    <button id="settingsBtn" class="iconbtn" title="Connect Kotak Neo">⚙</button>
   </div>
 </header>
 
-<nav class="headings" id="headings">
-  <button class="heading active" data-heading="patterns">📐 Patterns</button>
-  <button class="heading" data-heading="sd">🧱 Supply &amp; Demand</button>
-  <button class="heading" data-heading="volume">📊 Volume</button>
-</nav>
+<main id="app"></main>
 
-<main>
-  <section id="toolBanner" class="toolbanner"></section>
-  <section class="tooltabs" id="tooltabs"></section>
-
-  <section class="controls">
-    <div class="control-group">
-      <label>Universe</label>
-      <select id="universe">
-        <option value="nifty50">Nifty 50</option>
-        <option value="nifty100">Nifty 100 (liquid)</option>
-        <option value="nse500">NSE 500</option>
-        <option value="custom">Custom…</option>
-      </select>
-      <input id="customSymbols" class="hidden" type="text" placeholder="INFY, TCS, RELIANCE…">
-    </div>
-    <div class="control-group" id="toolOpts"></div>
-    <div class="control-group grow">
-      <button id="scanBtn" class="btn btn-primary">▶ Scan</button>
-      <button id="refreshBtn" class="btn btn-ghost" title="Force refresh data">↻</button>
-      <button id="liveBtn" class="btn btn-live hidden" title="Refresh live LTP from Kotak Neo">⚡ Live</button>
-      <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
-      <span id="statusText" class="status-text">Ready</span>
-    </div>
-  </section>
-
-  <section id="statsRow" class="stats-row"></section>
-  <section id="results" class="results"></section>
-</main>
+<footer class="footer">
+  <span>Analysis tool · not investment advice. Data: Yahoo Finance NSE feed, ~15 min delayed.</span>
+  <span id="genInfo" class="muted"></span>
+</footer>
 
 <div id="drawer" class="drawer hidden">
   <div class="drawer-panel">
@@ -90,11 +66,11 @@
   </div>
 </div>
 
-<footer class="footer">
-  <span>Analysis tool · not investment advice. Data: Yahoo Finance NSE feed.</span>
-  <span id="genInfo" class="muted"></span>
-</footer>
-
 <script src="app.js"></script>
+<script src="js/zd.js"></script>
+<script src="js/sd.js"></script>
+<script src="js/patterns.js"></script>
+<script src="js/volume.js"></script>
+<script src="js/triangle.js"></script>
 </body>
 </html>

@@ -51,8 +51,31 @@ def build_scan(rows, trade_types=None, min_score=4.0, on_progress=None, live_map
                 })
     flat.sort(key=lambda x: -(x.get("score") or 0))
     by_type = {t: sum(1 for f in flat if f["tradeType"] == t) for t in types}
-    stats = {"symbols": total, "tradeable": len(flat), "errors": errors, "by_type": by_type,
-             "types": types}
+
+    available = [r for r in results if r.get("available")]
+    trade = [r for r in results if r.get("tradeable")]
+    scores = [r.get("score") for r in results if r.get("score") is not None]
+    grades = {"A+": 0, "A": 0, "B": 0, "C": 0, "D": 0}
+    for r in results:
+        if r.get("grade") in grades:
+            grades[r["grade"]] += 1
+    stats = {
+        "symbols": total, "scanned": len(available), "tradeable": len(flat),
+        "buys": sum(1 for r in trade if r.get("action") == "BUY"),
+        "sells": sum(1 for r in trade if r.get("action") == "SELL"),
+        "definite": sum(1 for r in results if r.get("definite") and r.get("location")),
+        "aligned": sum(1 for r in trade if r.get("aligned") is True),
+        "watch": sum(1 for r in results if r.get("status") == "watch"),
+        "pending": sum(1 for r in results if r.get("status") == "pending"),
+        "noSetup": sum(1 for r in results if r.get("status") == "none"
+                       and r.get("statusLabel") != "Data error"),
+        "confluence": sum(1 for r in trade
+                          if ((r.get("confluence") or {}).get("score") or 0) >= 1.2),
+        "strongConfluence": sum(1 for r in trade
+                                if ((r.get("confluence") or {}).get("score") or 0) >= 2.0),
+        "avgScore": round(sum(scores) / len(scores), 2) if scores else 0,
+        "grades": grades, "errors": errors, "by_type": by_type, "types": types,
+    }
     return {"results": results, "tradeable": flat, "stats": stats}
 
 
