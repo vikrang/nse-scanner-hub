@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NSE Scanner Hub — Patterns · Supply &amp; Demand · Volume</title>
+<meta name="description" content="Unified NSE stock detection: chart patterns, multi-timeframe supply & demand zones, and volume delta. Yahoo base data with optional Kotak Neo live connect.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b1220'/><path d='M6 22 L13 14 L18 18 L26 8' stroke='%2338bdf8' stroke-width='2.5' fill='none'/></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">▲</span>
+    <div>
+      <h1>NSE Scanner Hub</h1>
+      <p class="tagline">Patterns · Supply &amp; Demand · Volume</p>
+    </div>
+  </div>
+  <div id="indexStrip" class="index-strip"></div>
+  <div class="top-actions">
+    <span id="dataBadge" class="badge badge-yahoo">Yahoo · ~15 min delayed</span>
+    <button id="themeBtn" class="btn btn-ghost" title="Toggle light / dark theme">🌙</button>
+    <span id="userChip" class="user-chip hidden"><span id="userEmail"></span><a href="/auth/logout" title="Sign out">⎋</a></span>
+    <button id="settingsBtn" class="btn btn-ghost" title="Connect Kotak Neo">⚙ Connect</button>
+  </div>
+</header>
+
+<nav class="headings" id="headings">
+  <button class="heading active" data-heading="patterns">📐 Patterns</button>
+  <button class="heading" data-heading="sd">🧱 Supply &amp; Demand</button>
+  <button class="heading" data-heading="volume">📊 Volume</button>
+</nav>
+
+<main>
+  <section class="tooltabs" id="tooltabs"></section>
+
+  <section class="controls">
+    <div class="control-group">
+      <label>Universe</label>
+      <select id="universe">
+        <option value="nifty50">Nifty 50</option>
+        <option value="nifty100">Nifty 100 (liquid)</option>
+        <option value="nse500">NSE 500</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <input id="customSymbols" class="hidden" type="text" placeholder="INFY, TCS, RELIANCE…">
+    </div>
+    <div class="control-group" id="toolOpts"></div>
+    <div class="control-group grow">
+      <button id="scanBtn" class="btn btn-primary">▶ Scan</button>
+      <button id="refreshBtn" class="btn btn-ghost" title="Force refresh data">↻</button>
+      <button id="liveBtn" class="btn btn-live hidden" title="Refresh live LTP from Kotak Neo">⚡ Live</button>
+      <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
+      <span id="statusText" class="status-text">Ready</span>
+    </div>
+  </section>
+
+  <section id="statsRow" class="stats-row"></section>
+  <section id="results" class="results"></section>
+</main>
+
+<div id="drawer" class="drawer hidden">
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <div><h2 id="drawerTitle">—</h2><p id="drawerSub" class="muted"></p></div>
+      <button id="drawerClose" class="btn btn-ghost">✕</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-panel">
+    <h2>Connect Kotak Neo (optional)</h2>
+    <p class="muted">Yahoo candles stay the base (~15 min delayed). A Kotak Neo access token refreshes
+      last-traded prices near real time. True tick-by-tick volume delta still needs the local desktop app.</p>
+    <label>Consumer key</label>
+    <input id="kotakKey" type="text" placeholder="consumer key">
+    <label>Access token</label>
+    <input id="kotakToken" type="password" placeholder="access token">
+    <p class="muted small">Stored only in this browser (localStorage). Sent to the server solely to fetch quotes.</p>
+    <div class="modal-actions">
+      <button id="kotakSave" class="btn btn-primary">Save</button>
+      <button id="kotakClear" class="btn btn-ghost">Disconnect</button>
+      <button id="kotakClose" class="btn btn-ghost">Close</button>
+    </div>
+    <p id="kotakStatus" class="small"></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <span>Analysis tool · not investment advice. Data: Yahoo Finance NSE feed.</span>
+  <span id="genInfo" class="muted"></span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
